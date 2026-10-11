@@ -1,0 +1,614 @@
+```html
+<!DOCTYPE html>
+<html lang="en" data-theme="cyan">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBONISO - Turbo Account Manager</title>
+    <!-- Tailwind CSS CDN for modern responsive layout utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            primary: 'var(--color-primary)',
+                            primaryHover: 'var(--color-primary-hover)',
+                            bg: 'var(--color-bg)',
+                            card: 'var(--color-card)',
+                            border: 'var(--color-border)',
+                            accent: 'var(--color-accent)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root[data-theme="cyan"] {
+            --color-primary: #00f2fe;
+            --color-primary-hover: #4facfe;
+            --color-bg: #0b0f19;
+            --color-card: #111827;
+            --color-border: rgba(0, 242, 254, 0.3);
+            --color-accent: #00f2fe;
+            --glow-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+        }
+        :root[data-theme="matrix"] {
+            --color-primary: #10b981;
+            --color-primary-hover: #059669;
+            --color-bg: #030712;
+            --color-card: #064e3b15;
+            --color-border: rgba(16, 185, 129, 0.3);
+            --color-accent: #10b981;
+            --glow-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+        }
+        :root[data-theme="crimson"] {
+            --color-primary: #f43f5e;
+            --color-primary-hover: #e11d48;
+            --color-bg: #0f0507;
+            --color-card: #1a080c;
+            --color-border: rgba(244, 63, 94, 0.3);
+            --color-accent: #f43f5e;
+            --glow-shadow: 0 0 20px rgba(244, 63, 94, 0.15);
+        }
+        :root[data-theme="oled"] {
+            --color-primary: #e2e8f0;
+            --color-primary-hover: #ffffff;
+            --color-bg: #000000;
+            --color-card: #0a0a0a;
+            --color-border: rgba(255, 255, 255, 0.15);
+            --color-accent: #38bdf8;
+            --glow-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card-box {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--glow-shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-gradient-text {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-btn {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+            color: #000;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .theme-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--color-border);
+        }
+
+        /* Custom Scrollbar for Terminals */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 flex flex-col items-center justify-center">
+
+    <div class="w-full max-w-4xl card-box rounded-2xl p-6 md:p-8">
+        
+        <!-- Header & Theme Switcher -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b border-gray-800 gap-4">
+            <div>
+                <h1 class="text-3xl font-black tracking-wider theme-gradient-text">âš¡ SBONISO</h1>
+                <p class="text-xs uppercase tracking-widest text-gray-400 mt-1">Turbo Account Management & Multi-Thread Console</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Theme Switcher -->
+                <div class="flex bg-black/40 p-1 rounded-lg border border-gray-800">
+                    <button onclick="setTheme('cyan')" class="px-2.5 py-1 text-xs rounded font-medium transition text-cyan-400 hover:bg-white/5" title="Cyber Cyan">Cyan</button>
+                    <button onclick="setTheme('matrix')" class="px-2.5 py-1 text-xs rounded font-medium transition text-emerald-400 hover:bg-white/5" title="Matrix Emerald">Matrix</button>
+                    <button onclick="setTheme('crimson')" class="px-2.5 py-1 text-xs rounded font-medium transition text-rose-400 hover:bg-white/5" title="Hacker Crimson">Crimson</button>
+                    <button onclick="setTheme('oled')" class="px-2.5 py-1 text-xs rounded font-medium transition text-slate-200 hover:bg-white/5" title="OLED Dark">OLED</button>
+                </div>
+                
+                <!-- Audio Toggle -->
+                <button id="audioToggle" onclick="toggleAudio()" class="px-3 py-1.5 text-xs bg-gray-800/80 hover:bg-gray-700 text-gray-300 rounded-lg border border-gray-700 transition flex items-center gap-1.5">
+                    ðŸ”Š <span id="audioStatus">Sound On</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Live Statistics Dashboard -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-black/30 p-4 rounded-xl border border-gray-800 text-center">
+                <span class="text-xs uppercase tracking-wider text-gray-400">Total Progress</span>
+                <div id="statTotal" class="text-2xl font-bold text-white mt-1">0 / 0</div>
+            </div>
+            <div class="bg-black/30 p-4 rounded-xl border border-emerald-900/50 text-center">
+                <span class="text-xs uppercase tracking-wider text-emerald-400">Successful</span>
+                <div id="statSuccess" class="text-2xl font-bold text-emerald-400 mt-1">0</div>
+            </div>
+            <div class="bg-black/30 p-4 rounded-xl border border-rose-900/50 text-center">
+                <span class="text-xs uppercase tracking-wider text-rose-400">Failed</span>
+                <div id="statFailed" class="text-2xl font-bold text-rose-400 mt-1">0</div>
+            </div>
+            <div class="bg-black/30 p-4 rounded-xl border border-blue-900/50 text-center">
+                <span class="text-xs uppercase tracking-wider text-blue-400">Est. Time (ETA)</span>
+                <div id="statEta" class="text-xl font-bold text-blue-400 mt-1">00:00</div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-6">
+            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                <span id="progressText">Idle - Ready to launch</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden border border-gray-800">
+                <div id="progressBar" class="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Controls Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Process Mode -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Process Mode</label>
+                <select id="workMode" onchange="toggleInputs()" class="w-full bg-gray-900/90 text-white border border-gray-800 rounded-lg p-3 text-sm outline-none focus:border-[var(--color-primary)] transition">
+                    <option value="pass">Only Password Change</option>
+                    <option value="email">Only Email Change (Random)</option>
+                    <option value="both">Both (Email & Password)</option>
+                </select>
+            </div>
+
+            <!-- API Version Key -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">API Endpoint Version</label>
+                <select id="ver" class="w-full bg-gray-900/90 text-white border border-gray-800 rounded-lg p-3 text-sm outline-none focus:border-[var(--color-primary)] transition">
+                    <option value="AIzaSyCQDz9rgjgmvmFkvVfmvr2-7fT4tfrzRRQ">CPM 2 (Fastest)</option>
+                    <option value="AIzaSyAe_aOVT1gSfmHKBrorFvX4fRwN5nODXVA">CPM 1</option>
+                </select>
+            </div>
+
+            <!-- Concurrency & Proxy Settings -->
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5" title="Simultaneous Threads">Threads (<span id="threadVal">3</span>)</label>
+                    <input type="range" id="threadCount" min="1" max="10" value="3" oninput="document.getElementById('threadVal').innerText=this.value" class="w-full accent-[var(--color-primary)] mt-2 cursor-pointer">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Proxy Routing</label>
+                    <input type="text" id="proxyInput" placeholder="http://ip:port (opt)" class="w-full bg-gray-900 text-white border border-gray-800 rounded-lg p-2.5 text-xs outline-none focus:border-[var(--color-primary)]">
+                </div>
+            </div>
+        </div>
+
+        <!-- Inputs Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Account List (Email:Password)</label>
+                <textarea id="list" placeholder="user1@gmail.com:pass123&#10;user2@gmail.com:pass456" class="w-full bg-gray-900/90 text-emerald-400 font-mono text-xs border border-gray-800 rounded-lg p-3 h-36 outline-none focus:border-[var(--color-primary)] resize-none"></textarea>
+            </div>
+
+            <div class="flex flex-col justify-between">
+                <div>
+                    <div id="emailFields" class="mb-3 hidden space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">New Email Base</label>
+                            <input type="text" id="baseEmail" placeholder="e.g. sboniso" class="w-full bg-gray-900 text-white border border-gray-800 rounded-lg p-2.5 text-sm outline-none focus:border-[var(--color-primary)]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Random Digits Count</label>
+                            <input type="number" id="digitCount" value="4" class="w-full bg-gray-900 text-white border border-gray-800 rounded-lg p-2.5 text-sm outline-none focus:border-[var(--color-primary)]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label id="passLabel" class="block text-xs font-semibold text-gray-400 uppercase mb-1">New Target Password</label>
+                        <input type="text" id="newpass" placeholder="Enter New Secure Password" class="w-full bg-gray-900 text-white border border-gray-800 rounded-lg p-2.5 text-sm outline-none focus:border-[var(--color-primary)]">
+                    </div>
+                </div>
+
+                <!-- Operation Control Action Buttons -->
+                <div class="grid grid-cols-4 gap-2 mt-4">
+                    <button onclick="startTurbo()" id="btnStart" class="theme-btn py-3 px-2 rounded-lg text-xs tracking-wider uppercase shadow-lg">ðŸš€ Start</button>
+                    <button onclick="pauseTurbo()" id="btnPause" disabled class="bg-gray-800 text-gray-400 py-3 px-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-not-allowed transition">â¸ Pause</button>
+                    <button onclick="resumeTurbo()" id="btnResume" disabled class="bg-gray-800 text-gray-400 py-3 px-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-not-allowed transition">â–¶ Resume</button>
+                    <button onclick="stopTurbo()" id="btnStop" disabled class="bg-rose-950/40 border border-rose-900/60 text-rose-400 py-3 px-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-not-allowed transition">â¹ Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal & Results Area -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Console Logs -->
+            <div class="bg-black/60 rounded-xl p-4 border border-gray-800 flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">ðŸ’» System Console</span>
+                    <button onclick="document.getElementById('status').innerHTML='Console cleared...'" class="text-[10px] text-gray-500 hover:text-gray-300">Clear Logs</button>
+                </div>
+                <div id="status" class="h-40 overflow-y-auto font-mono text-[11px] text-gray-300 leading-relaxed space-y-1 bg-black/40 p-2.5 rounded border border-gray-900/60">
+                    [SBONISO Engine Ready...]
+                </div>
+            </div>
+
+            <!-- Success Box & Exports -->
+            <div class="bg-black/60 rounded-xl p-4 border border-gray-800 flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">âœ… Success Results</span>
+                    <span id="successCountBadge" class="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-900">0 Items</span>
+                </div>
+                <textarea id="successList" readonly placeholder="Successful credentials will aggregate here..." class="w-full bg-black/40 text-emerald-400 font-mono text-xs border border-gray-900/60 rounded-lg p-2.5 h-24 outline-none resize-none mb-3"></textarea>
+                
+                <!-- Export Actions -->
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="copyResult()" class="bg-gray-800 hover:bg-gray-700 text-cyan-400 font-semibold py-2 px-2 rounded-lg text-xs transition border border-gray-700">ðŸ“‹ Copy</button>
+                    <button onclick="downloadTxt()" class="bg-gray-800 hover:bg-gray-700 text-emerald-400 font-semibold py-2 px-2 rounded-lg text-xs transition border border-gray-700">ðŸ’¾ .TXT</button>
+                    <button onclick="downloadCsv()" class="bg-gray-800 hover:bg-gray-700 text-blue-400 font-semibold py-2 px-2 rounded-lg text-xs transition border border-gray-700">ðŸ“Š .CSV</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // State Management
+        let isRunning = false;
+        let isPaused = false;
+        let stopRequested = false;
+        let audioEnabled = true;
+        let auditReport = []; // Stores detailed records for CSV export
+        let successCredentials = [];
+
+        // Web Audio API Sound Synthesizer
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (!audioEnabled) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                const now = audioCtx.currentTime;
+                if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, now); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'complete') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.setValueAtTime(554.37, now + 0.1);
+                    osc.frequency.setValueAtTime(659.25, now + 0.2);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                }
+            } catch (e) {
+                // Audio context fallback suppression
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audioStatus').innerText = audioEnabled ? "Sound On" : "Muted";
+            document.getElementById('audioToggle').style.opacity = audioEnabled ? "1" : "0.5";
+        }
+
+        function setTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+        }
+
+        function toggleInputs() {
+            let mode = document.getElementById('workMode').value;
+            let emailFields = document.getElementById('emailFields');
+            let passField = document.getElementById('newpass');
+            let passLabel = document.getElementById('passLabel');
+            
+            emailFields.style.display = (mode === 'email' || mode === 'both') ? 'block' : 'none';
+            if (mode === 'email') {
+                passLabel.innerText = "Current Password Verification";
+                passField.placeholder = "Current Password required for login check";
+            } else {
+                passLabel.innerText = "New Target Password";
+                passField.placeholder = "Enter New Secure Password";
+            }
+        }
+
+        function logMessage(msg, className = '') {
+            let log = document.getElementById('status');
+            let span = document.createElement('div');
+            span.className = className;
+            span.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            log.appendChild(span);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Controls
+        function pauseTurbo() {
+            isPaused = true;
+            document.getElementById('btnPause').disabled = true;
+            document.getElementById('btnResume').disabled = false;
+            logMessage("â¸ Batch queue paused by user.", "text-yellow-400");
+            document.getElementById('progressText').innerText = "Paused...";
+        }
+
+        function resumeTurbo() {
+            isPaused = false;
+            document.getElementById('btnPause').disabled = false;
+            document.getElementById('btnResume').disabled = true;
+            logMessage("â–¶ Resuming batch queue...", "text-blue-400");
+            document.getElementById('progressText').innerText = "Processing accounts...";
+        }
+
+        function stopTurbo() {
+            stopRequested = true;
+            isPaused = false;
+            logMessage("â¹ Stop requested. Terminating worker threads safely...", "text-rose-400");
+        }
+
+        function setButtonsState(running) {
+            document.getElementById('btnStart').disabled = running;
+            document.getElementById('btnStart').style.opacity = running ? "0.5" : "1";
+            document.getElementById('btnPause').disabled = !running;
+            document.getElementById('btnPause').className = running ? "bg-amber-600 hover:bg-amber-500 text-black py-3 px-2 rounded-lg text-xs font-bold uppercase tracking-wider transition cursor-pointer" : "bg-gray-800 text-gray-400 py-3 px-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-not-allowed";
+            document.getElementById('btnStop').disabled = !running;
+            document.getElementById('btnStop').className = running ? "bg-rose-600 hover:bg-rose-500 text-white py-3 px-2 rounded-lg text-xs font-bold uppercase tracking-wider transition cursor-pointer" : "bg-rose-950/40 border border-rose-900/60 text-rose-400 py-3 px-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-not-allowed";
+        }
+
+        async function startTurbo() {
+            let mode = document.getElementById('workMode').value;
+            let listStr = document.getElementById('list').value.trim();
+            let newP = document.getElementById('newpass').value.trim();
+            let baseE = document.getElementById('baseEmail').value.trim();
+            let dCount = parseInt(document.getElementById('digitCount').value) || 4;
+            let key = document.getElementById('ver').value;
+            let threadCount = parseInt(document.getElementById('threadCount').value) || 3;
+            let proxy = document.getElementById('proxyInput').value.trim();
+
+            if (!listStr) { alert("Please paste your account list!"); return; }
+            if (mode !== 'email' && !newP) { alert("Please enter new password!"); return; }
+            if ((mode === 'email' || mode === 'both') && !baseE) { alert("Please enter email base name!"); return; }
+
+            let rawLines = listStr.split('\n');
+            let accounts = [];
+            for (let line of rawLines) {
+                line = line.trim();
+                if (line.includes(':')) {
+                    let parts = line.split(':');
+                    let e = parts[0].trim();
+                    let p = parts.slice(1).join(':').trim(); // handle passwords with colons
+                    accounts.push({ email: e, pass: p });
+                }
+            }
+
+            if (accounts.length === 0) { alert("No valid Email:Password entries found!"); return; }
+
+            // Reset UI Metrics
+            isRunning = true;
+            isPaused = false;
+            stopRequested = false;
+            setButtonsState(true);
+            auditReport = [];
+            successCredentials = [];
+            document.getElementById('successList').value = "";
+            document.getElementById('successCountBadge').innerText = "0 Items";
+            
+            let total = accounts.length;
+            let completed = 0;
+            let successCount = 0;
+            let failedCount = 0;
+            let startTime = Date.now();
+
+            logMessage(`ðŸš€ [SBONISO] Started batch execution. Mode: ${mode.toUpperCase()} | Accounts: ${total} | Threads: ${threadCount}`);
+
+            // Queue processing worker pool function
+            let currentIndex = 0;
+
+            async function worker() {
+                while (currentIndex < accounts.length && !stopRequested) {
+                    while (isPaused && !stopRequested) {
+                        await new Promise(r => setTimeout(r, 200));
+                    }
+                    if (stopRequested) break;
+
+                    let accIndex = currentIndex++;
+                    let acc = accounts[accIndex];
+
+                    // Generate Random Email if required
+                    let min = Math.pow(10, dCount - 1);
+                    let max = Math.pow(10, dCount) - 1;
+                    let randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+                    let targetEmail = (mode === 'email' || mode === 'both') ? `${baseE}${randomNum}@gmail.com` : acc.email;
+                    let targetPass = (mode === 'pass' || mode === 'both') ? newP : acc.pass;
+
+                    // Execute request against Firebase Identity Toolkit API
+                    let resData = await processAccountRequest(acc.email, acc.pass, targetEmail, targetPass, mode, key);
+
+                    completed++;
+                    if (resData.success) {
+                        successCount++;
+                        playSound('success');
+                        successCredentials.push(`${targetEmail}:${targetPass}`);
+                        document.getElementById('successList').value = successCredentials.join('\n');
+                        document.getElementById('successCountBadge').innerText = `${successCount} Items`;
+                        logMessage(`âœ… OK: ${acc.email} -> ${targetEmail}`, "text-emerald-400");
+                        auditReport.push({ oldEmail: acc.email, newEmail: targetEmail, newPass: targetPass, status: 'SUCCESS', error: '' });
+                    } else {
+                        failedCount++;
+                        playSound('error');
+                        logMessage(`âŒ FAIL: ${acc.email} (${resData.error})`, "text-rose-400");
+                        auditReport.push({ oldEmail: acc.email, newEmail: targetEmail, newPass: targetPass, status: 'FAILED', error: resData.error });
+                    }
+
+                    // Update Dashboard Stats & Progress
+                    let percent = Math.round((completed / total) * 100);
+                    document.getElementById('statTotal').innerText = `${completed} / ${total}`;
+                    document.getElementById('statSuccess').innerText = successCount;
+                    document.getElementById('statFailed').innerText = failedCount;
+                    document.getElementById('statProgressText') || '';
+                    document.getElementById('progressPercent').innerText = `${percent}%`;
+                    document.getElementById('progressBar').style.width = `${percent}%`;
+
+                    // Calculate ETA
+                    let elapsed = (Date.now() - startTime) / 1000;
+                    let rate = completed / elapsed; // items per second
+                    let remainingItems = total - completed;
+                    let etaSeconds = rate > 0 ? Math.round(remainingItems / rate) : 0;
+                    let etaMin = Math.floor(etaSeconds / 60).toString().padStart(2, '0');
+                    let etaSec = (etaSeconds % 60).toString().padStart(2, '0');
+                    document.getElementById('statEta').innerText = `${etaMin}:${etaSec}`;
+
+                    // Small thread tick yield
+                    await new Promise(r => setTimeout(r, 50));
+                }
+            }
+
+            // Spawn concurrent worker threads
+            let workers = [];
+            let activeThreads = Math.min(threadCount, accounts.length);
+            for (let t = 0; t < activeThreads; t++) {
+                workers.push(worker());
+            }
+
+            await Promise.all(workers);
+
+            isRunning = false;
+            setButtonsState(false);
+            document.getElementById('btnPause').disabled = true;
+            document.getElementById('btnResume').disabled = true;
+            document.getElementById('progressText').innerText = stopRequested ? "Aborted by user" : "Batch execution complete!";
+            
+            if (!stopRequested) {
+                playSound('complete');
+                logMessage(`ðŸ --- BATCH COMPLETED SUCCESSFULLY. Total Success: ${successCount}, Failed: ${failedCount} ---`, "text-cyan-400 font-bold");
+            } else {
+                logMessage(`âš ï¸ --- BATCH ABORTED BY USER ---`, "text-yellow-400 font-bold");
+            }
+        }
+
+        async function processAccountRequest(e, p, targetE, targetP, mode, key) {
+            try {
+                // Step 1: Verify Password / Login
+                let res1 = await fetch(`https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=${key}`, {
+                    method: 'POST',
+                    body: JSON.stringify({ email: e, password: p, returnSecureToken: true }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                let d1 = await res1.json();
+
+                if (d1.idToken) {
+                    let updateData = { idToken: d1.idToken, returnSecureToken: true };
+                    
+                    if (mode === 'pass') {
+                        updateData.password = targetP;
+                    } else if (mode === 'email') {
+                        updateData.email = targetE;
+                    } else if (mode === 'both') {
+                        updateData.email = targetE;
+                        updateData.password = targetP;
+                    }
+
+                    // Step 2: Update account credentials
+                    let res2 = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:update?key=${key}`, {
+                        method: 'POST',
+                        body: JSON.stringify(updateData),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (res2.ok) {
+                        return { success: true };
+                    } else {
+                        let d2 = await res2.json();
+                        let errMsg = d2.error && d2.error.message ? d2.error.message : 'Update failed';
+                        return { success: false, error: errMsg };
+                    }
+                } else {
+                    let errMessage = d1.error && d1.error.message ? d1.error.message : 'Invalid credentials';
+                    return { success: false, error: errMessage };
+                }
+            } catch (err) {
+                return { success: false, error: 'Network / CORS error' };
+            }
+        }
+
+        // Export utilities
+        async function copyResult() {
+            let copyText = document.getElementById("successList");
+            if (!copyText.value) { alert("Success list is empty!"); return; }
+            try {
+                await navigator.clipboard.writeText(copyText.value);
+                alert("Success list copied to clipboard!");
+            } catch (err) {
+                copyText.select();
+                document.execCommand("copy");
+                alert("Success list copied to clipboard!");
+            }
+        }
+
+        function downloadTxt() {
+            let text = document.getElementById("successList").value;
+            if (!text) { alert("No success records to download!"); return; }
+            let blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `sboniso_success_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function downloadCsv() {
+            if (auditReport.length === 0) { alert("No audit records available yet!"); return; }
+            let csvContent = "OldEmail,NewEmail,NewPassword,Status,Error\r\n";
+            auditReport.forEach(row => {
+                csvContent += `"${row.oldEmail}","${row.newEmail}","${row.newPass}","${row.status}","${row.error}"\r\n`;
+            });
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `sboniso_report_${Date.now()}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
+```
